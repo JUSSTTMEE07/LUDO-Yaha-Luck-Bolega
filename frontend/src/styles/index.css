@@ -1,0 +1,488 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Google Fonts ─────────────────────────────────────────────────────────── */
+/* Inter + Outfit are loaded via <link> in index.html */
+
+/* ── CSS Custom Properties ───────────────────────────────────────────────── */
+:root {
+  --color-bg-deep:    #0B0F1A;
+  --color-bg-dark:    #121826;
+  --color-bg-card:    #1A2235;
+  --color-glass:      rgba(255, 255, 255, 0.03);
+  --color-glass-border: rgba(255, 255, 255, 0.04);
+  --color-accent:     #6C63FF;
+  --color-accent-glow: rgba(108, 99, 255, 0.15);
+
+  /* Minimal muted Ludo colors */
+  --color-green:      #4A7C59;
+  --color-green-light: #589169;
+  --color-red:        #A84D4D;
+  --color-red-light:  #C25B5B;
+  --color-blue:       #4A6B8C;
+  --color-blue-light: #5B81A8;
+  --color-yellow:     #A8874D;
+  --color-yellow-light: #C29D5B;
+}
+
+/* ── Base Reset ──────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Prevent overscroll on iPhone */
+  overscroll-behavior: none;
+  background: var(--color-bg-deep);
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-bg-deep);
+  color: #E2E8F0;
+  min-height: 100dvh; /* dynamic viewport for iOS Safari */
+  overflow-x: hidden;
+  overscroll-behavior-y: none;
+}
+
+#root {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Glassmorphism Utility ───────────────────────────────────────────────── */
+.glass {
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.025));
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+.glass-sm {
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22);
+}
+
+.panel-glass {
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+/* ── Background Gradient ─────────────────────────────────────────────────── */
+.bg-gradient-ludo {
+  background: radial-gradient(1200px 720px at 50% -20%, #1a2438 0%, #121826 45%, #0B0F1A 100%);
+}
+
+.ui-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.ui-ripple::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at center, rgba(255,255,255,0.16), transparent 60%);
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+}
+
+.ui-ripple:active::after {
+  opacity: 1;
+  transform: scale(1.2);
+}
+
+/* ── Ludo Board Cell Colors (Muted) ──────────────────────────────────────── */
+.cell-green  { background: #3B5745; }
+.cell-red    { background: #7A3E3E; }
+.cell-blue   { background: #37506B; }
+.cell-yellow { background: #7A633E; }
+.cell-safe   { background: #161C26; }
+.cell-white  { background: transparent; }
+.cell-center { background: #111622; }
+
+/* ── Trap tile glow (Subtle) ─────────────────────────────────────────────── */
+.cell-trap-send_home { box-shadow: inset 0 0 4px rgba(168,77,77,0.4); }
+.cell-trap-freeze    { box-shadow: inset 0 0 4px rgba(74,107,140,0.4); }
+.cell-trap-reverse   { box-shadow: inset 0 0 4px rgba(168,135,77,0.4); }
+
+/* ── Token styles ────────────────────────────────────────────────────────── */
+.token {
+  width: 70%;
+  height: 70%;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.1);
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  /* Matte finish */
+  background: radial-gradient(circle at 40% 40%, rgba(255,255,255,0.15) 0%, transparent 80%);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+}
+
+.token:hover  { transform: scale(1.05); }
+.token.active { box-shadow: 0 0 0 1px white, 0 0 8px rgba(255,255,255,0.2); transform: scale(1.05); }
+.token.selectable { animation: tokenPulse 2s ease-in-out infinite; cursor: pointer; }
+
+.token-green  { background-color: var(--color-green);  }
+.token-red    { background-color: var(--color-red);    }
+.token-blue   { background-color: var(--color-blue);   }
+.token-yellow { background-color: var(--color-yellow); }
+
+@keyframes tokenPulse {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(255,255,255,0.4), 0 0 4px rgba(255,255,255,0.1); }
+  50%      { box-shadow: 0 0 0 2px rgba(255,255,255,0.8), 0 0 10px rgba(255,255,255,0.2); }
+}
+
+/* ── Dice ────────────────────────────────────────────────────────────────── */
+.dice-face {
+  background: #f4f5f7;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.8);
+}
+
+/* ── Scrollbar styling ───────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); border-radius: 4px; }
+
+/* ── Selection ───────────────────────────────────────────────────────────── */
+::selection { background: rgba(108,99,255,0.2); }
+
+/* ── Prevent tap highlight on iOS ────────────────────────────────────────── */
+button, a { -webkit-tap-highlight-color: transparent; }
+button, a, [role="button"] { touch-action: manipulation; }
+
+/* ── Danger/Heartbeat overlay (Extremely subtle) ─────────────────────────── */
+.danger-pulse {
+  animation: dangerPulse 2s ease-in-out infinite;
+}
+
+@keyframes dangerPulse {
+  0%, 100% { background-color: transparent; }
+  50%      { background-color: rgba(168,77,77,0.03); }
+}
+
+/* ── Power glow ring (Subtle) ────────────────────────────────────────────── */
+.power-active {
+  position: relative;
+}
+.power-active::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: conic-gradient(from 0deg, rgba(108,99,255,0.2), rgba(139,128,255,0.4), rgba(108,99,255,0.2));
+  z-index: -1;
+  animation: rotateBorder 3s linear infinite;
+}
+@keyframes rotateBorder {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Almost-cut flash (Extremely subtle) ─────────────────────────────────── */
+.almost-cut-flash {
+  animation: almostCutFlash 0.5s ease-in-out 2;
+}
+@keyframes almostCutFlash {
+  0%, 100% { background: transparent; }
+  50%      { background: rgba(168,77,77,0.05); }
+}
+
+/* ── Turn indicator pulse ─────────────────────────────────────────────────── */
+@keyframes pulse {
+  0%, 100% { transform: scale(1);   opacity: 1; }
+  50%       { transform: scale(1.6); opacity: 0.6; }
+}
+
+/* ── Transition defaults ─────────────────────────────────────────────────── */
+.transition-gpu {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* ── PostCSS / Tailwind ──────────────────────────────────────────────────── */
+@layer components {
+  .btn-primary {
+    @apply bg-accent-primary hover:bg-accent-glow text-white font-semibold px-6 py-3 rounded-xl
+           transition-all duration-200 active:scale-95 shadow-glow;
+  }
+
+  .btn-ghost {
+    @apply bg-transparent border border-white/10 hover:border-white/25 text-white/80
+           font-medium px-6 py-3 rounded-xl transition-all duration-200 active:scale-95;
+  }
+
+  .input-field {
+    @apply w-full bg-white/5 border border-white/10 text-white placeholder-white/30
+           rounded-xl px-4 py-3 focus:outline-none focus:border-accent-primary
+           focus:ring-1 focus:ring-accent-primary transition-all duration-200;
+  }
+
+  .player-panel {
+    @apply glass p-3 rounded-2xl flex flex-col gap-2;
+  }
+}
+
+/* ── Mobile Responsive ───────────────────────────────────────────────────── */
+
+/* Safe area padding for notched devices (iPhone X+, Dynamic Island) */
+.safe-area-top    { padding-top:    env(safe-area-inset-top, 0px); }
+.safe-area-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+.safe-area-left   { padding-left:   env(safe-area-inset-left, 0px); }
+.safe-area-right  { padding-right:  env(safe-area-inset-right, 0px); }
+
+/* Minimum touch target — Apple HIG recommends 44px */
+.touch-target {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Prevent text selection on game elements */
+.no-select {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Smooth touch scrolling */
+.scroll-touch {
+  -webkit-overflow-scrolling: touch;
+  overflow-y: auto;
+}
+
+/* ── Mobile Game Layout ──────────────────────────────────────────────────── */
+
+/* Mobile-first game container — vertical stack */
+.game-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  position: relative;
+}
+
+/* Desktop: 3-column layout */
+@media (min-width: 769px) {
+  .game-layout-main {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  .game-sidebar { width: 172px; flex-shrink: 0; }
+  .game-sidebar-right { width: 160px; flex-shrink: 0; }
+  .game-board-area { flex: 1; min-width: 0; }
+}
+
+/* Mobile: stacked layout */
+@media (max-width: 768px) {
+  .game-layout-main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 0.4rem;
+  }
+  .game-sidebar { display: none; } /* players shown as compact strip */
+  .game-sidebar-right { display: none; } /* controls shown in bottom bar */
+  .game-board-area {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Mobile compact player strip (horizontal) */
+  .mobile-player-strip {
+    display: flex;
+    gap: 0.4rem;
+    padding: 0.5rem 0.75rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .mobile-player-strip::-webkit-scrollbar { display: none; }
+
+  .mobile-player-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.6rem;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    flex-shrink: 0;
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.8);
+    white-space: nowrap;
+  }
+  .mobile-player-chip.active {
+    border-color: rgba(108,99,255,0.5);
+    background: rgba(108,99,255,0.1);
+  }
+
+  /* Mobile bottom action bar */
+  .mobile-action-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    gap: 0.5rem;
+    padding: 0.55rem 0.65rem;
+    padding-bottom: calc(0.55rem + env(safe-area-inset-bottom, 0px));
+    background: rgba(10,14,26,0.95);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    z-index: 50;
+  }
+
+  .mobile-dice-btn {
+    min-width: 68px;
+    min-height: 54px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 0.15rem;
+    background: linear-gradient(135deg, #6C63FF 0%, #8B80FF 100%);
+    border: none;
+    border-radius: 14px;
+    color: white;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    box-shadow: 0 4px 20px rgba(108,99,255,0.35);
+    flex-shrink: 0;
+    padding: 0.5rem 1rem;
+  }
+  .mobile-dice-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .mobile-dice-btn .dice-value {
+    font-size: 1.3rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .mobile-power-btn {
+    min-width: 46px;
+    min-height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    color: rgba(255,255,255,0.6);
+    font-size: 0.75rem;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    padding: 0.4rem;
+    flex-shrink: 0;
+  }
+  .mobile-power-btn.has-power {
+    border-color: rgba(108,99,255,0.3);
+    color: #a78bfa;
+    background: rgba(108,99,255,0.1);
+  }
+
+  .mobile-turn-label {
+    flex: 1;
+    text-align: center;
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.5);
+    font-weight: 500;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .mobile-turn-label .highlight {
+    color: #c4b5fd;
+    font-weight: 600;
+  }
+}
+
+@media (display-mode: standalone) {
+  body {
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .safe-area-top {
+    padding-top: max(env(safe-area-inset-top, 0px), 6px);
+  }
+}
+
+/* ── Mobile page adjustments ─────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Landing nav — stack on very small screens */
+  .landing-nav-actions {
+    gap: 0.4rem !important;
+  }
+  .landing-nav-actions button {
+    padding: 0.55rem 1rem !important;
+    font-size: 0.85rem !important;
+    min-height: 44px;
+  }
+
+  /* Auth card — reduce padding on mobile */
+  .auth-card {
+    padding: 1.75rem !important;
+    border-radius: 20px !important;
+    margin: 0 0.5rem;
+  }
+
+  /* Lobby card — adjust for mobile */
+  .lobby-card {
+    padding: 1.5rem !important;
+    border-radius: 18px !important;
+    margin: 0 0.25rem;
+  }
+
+  /* End screen — tighter on mobile */
+  .end-card {
+    padding: 1.5rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  /* Buttons — ensure touch target */
+  button, a, [role="button"] {
+    min-height: 44px;
+  }
+}
+
+/* ── Very small screens (iPhone SE, etc.) ────────────────────────────────── */
+@media (max-width: 380px) {
+  .game-layout-main {
+    padding: 0.25rem;
+  }
+  .mobile-action-bar {
+    padding: 0.4rem 0.5rem;
+    padding-bottom: calc(0.4rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
